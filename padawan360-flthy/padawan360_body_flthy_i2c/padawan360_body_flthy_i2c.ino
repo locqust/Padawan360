@@ -86,6 +86,10 @@ const int DOMEBAUDRATE = 9600;
 // Un-comment for simple serial - do not use in close contact with people
 //#define SYRENSIMPLE
 
+String hpEvent = "";
+//int hpEvent_len = hpEvent.length() + 1;
+char char_array[11];
+ 
 // I have a pin set to pull a relay high/low to trigger my upside down compressed air like R2's extinguisher
 #define EXTINGUISHERPIN 3
 
@@ -181,13 +185,10 @@ void setup() {
   mp3Trigger.setup();
   mp3Trigger.setVolume(vol);
 
-  // Start I2C Bus. The body is the master.
-  Wire.begin();
 
- String hpEvent = "";
- int str_len = hpEvent.length() + 1;
- char char_array[str_len];
- 
+
+  // Start I2C Bus. The body is the master.
+  Wire.begin(); 
   
   //Serial.begin(115200);
   // Wait for serial port to connect - used on Leonardo, Teensy and other boards with built-in USB CDC serial connection
@@ -546,8 +547,8 @@ void triggerI2C(byte deviceID, byte eventID) {
   Wire.endTransmission();
 }
 void triggerI2C2(byte deviceID, String hpEvent) {
-
   Wire.beginTransmission(deviceID);
-  Wire.write(hpEvent.toCharArray(char_array, hpEvent_len);
+  hpEvent.toCharArray(char_array,11);
+  Wire.write(char_array);
   Wire.endTransmission();
 }
