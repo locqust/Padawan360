@@ -139,7 +139,7 @@ boolean firstLoadOnConnect = false;
 //SEND_DATA_STRUCTURE domeData;//give a name to the group of data
 
 boolean isHPOn = false;
-
+ 
 
 
 MP3Trigger mp3Trigger;
@@ -184,7 +184,10 @@ void setup() {
   // Start I2C Bus. The body is the master.
   Wire.begin();
 
-  String eventHP = "";
+ String hpEvent = "";
+ int str_len = hpEvent.length() + 1;
+ char char_array[str_len];
+ 
   
   //Serial.begin(115200);
   // Wait for serial port to connect - used on Leonardo, Teensy and other boards with built-in USB CDC serial connection
@@ -197,7 +200,7 @@ void setup() {
 }
 
 
-void loop() {
+void loop() { 
   Usb.Task();
   // if we're not connected, return so we don't bother doing anything else.
   // set all movement to 0 so if we lose connection we don't have a runaway droid!
@@ -543,7 +546,8 @@ void triggerI2C(byte deviceID, byte eventID) {
   Wire.endTransmission();
 }
 void triggerI2C2(byte deviceID, String hpEvent) {
+
   Wire.beginTransmission(deviceID);
-  Wire.write(hpEvent.c_str());
+  Wire.write(hpEvent.toCharArray(char_array, hpEvent_len);
   Wire.endTransmission();
 }
