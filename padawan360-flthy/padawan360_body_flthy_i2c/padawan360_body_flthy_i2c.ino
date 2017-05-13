@@ -87,7 +87,7 @@ const int DOMEBAUDRATE = 9600;
 //#define SYRENSIMPLE
 
 String hpEvent = "";
-//int hpEvent_len = hpEvent.length() + 1;
+int hpEvent_len = hpEvent.length() + 1;
 char char_array[11];
  
 // I have a pin set to pull a relay high/low to trigger my upside down compressed air like R2's extinguisher
@@ -550,5 +550,6 @@ void triggerI2C2(byte deviceID, String hpEvent) {
   Wire.beginTransmission(deviceID);
   hpEvent.toCharArray(char_array,11);
   Wire.write(char_array);
+  //Serial.print(char_array);
   Wire.endTransmission();
 }
