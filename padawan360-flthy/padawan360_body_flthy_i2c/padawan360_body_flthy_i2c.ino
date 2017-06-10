@@ -87,7 +87,7 @@ const int DOMEBAUDRATE = 9600;
 //#define SYRENSIMPLE
 
 String hpEvent = "";
-int hpEvent_len = hpEvent.length() + 1;
+//int hpEvent_len = hpEvent.length() + 1;
 char char_array[11];
  
 // I have a pin set to pull a relay high/low to trigger my upside down compressed air like R2's extinguisher
@@ -120,7 +120,7 @@ boolean isInAutomationMode = false;
 unsigned long automateMillis = 0;
 byte automateDelay = random(5, 20); // set this to min and max seconds between sounds
 //How much the dome may turn during automation.
-int turnDirection = 20;
+int turnDirection = 65;
 // Action number used to randomly choose a sound effect or a dome turn
 byte automateAction = 0;
 int driveThrottle = 0;
@@ -191,6 +191,8 @@ void setup() {
   Wire.begin(); 
   
   //Serial.begin(115200);
+  //Serial.begin(9600);
+  mp3Trigger.play(23);
   // Wait for serial port to connect - used on Leonardo, Teensy and other boards with built-in USB CDC serial connection
   while (!Serial);
   if (Usb.Init() == -1) {
@@ -268,7 +270,7 @@ void loop() {
       automateAction = random(1, 5);
 
       if (automateAction > 1) {
-        mp3Trigger.play(random(32, 52));
+        mp3Trigger.play(random(17, 167));
       }
       if (automateAction < 4) {
 #if defined(SYRENSIMPLE)
@@ -286,9 +288,9 @@ void loop() {
 #endif
 
         if (turnDirection > 0) {
-          turnDirection = -45;
+          turnDirection = -65;
         } else {
-          turnDirection = 45;
+          turnDirection = 65;
         }
       }
 
@@ -351,18 +353,27 @@ void loop() {
   // Y Button and Y combo buttons
   if (Xbox.getButtonClick(Y, 0)) {
     if (Xbox.getButtonPress(L1, 0)) {
+      //Annoyed
       mp3Trigger.play(8);
       //logic lights, random
       triggerI2C(10, 0);
     } else if (Xbox.getButtonPress(L2, 0)) {
+      //Chortle
       mp3Trigger.play(2);
       //logic lights, random
       triggerI2C(10, 0);
     } else if (Xbox.getButtonPress(R1, 0)) {
+      //Theme
       mp3Trigger.play(9);
       //logic lights, random
       triggerI2C(10, 0);
+    } else if (Xbox.getButtonPress(R2, 0)) {
+      //More Alarms
+      mp3Trigger.play(random(56, 62));
+      //logic lights, random
+      triggerI2C(10, 0);
     } else {
+      //Alarms
       mp3Trigger.play(random(13, 17));
       //logic lights, random
       triggerI2C(10, 0);
@@ -433,7 +444,7 @@ void loop() {
       //logic lights - Alarm
       triggerI2C(10, 4);
       //HPEvent pulse Red for 4 seconds
-      triggerI2C2(25, "A0031|4");
+      triggerI2C2(25, "A00312|5");
     } else if (Xbox.getButtonPress(R1, 0)) {
       mp3Trigger.play(12);
       //logic lights, random
@@ -551,5 +562,6 @@ void triggerI2C2(byte deviceID, String hpEvent) {
   hpEvent.toCharArray(char_array,11);
   Wire.write(char_array);
   //Serial.print(char_array);
+  //Serial.print(deviceID);
   Wire.endTransmission();
 }
