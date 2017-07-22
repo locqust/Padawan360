@@ -1,7 +1,9 @@
 // =======================================================================================
-// /////////////////////////Padawan360 Body Code v1.5 ////////////////////////////////////
+// /////////////////////////Padawan360 Body Code v1.6 ////////////////////////////////////
 // =======================================================================================
 /*
+v1.6 by Andy Smith (locqust)
+-added psybertech's code used to control Flthy HP via serial to overcome I2C issues
 v1.5 by Andy Smith (locqust)
 - added in I2C command codes for magic panel 
 - added in Flthy I2C command codes (currently not working)
@@ -101,11 +103,13 @@ const int SABERTOOTHBAUDRATE = 9600;
 // and I think it varies across different firmware versions.
 const int DOMEBAUDRATE = 9600;
 
-String hpEvent = "";
-char char_array[11];
+//String hpEvent = "";
+//char char_array[11];
 
 // I have a pin set to pull a relay high/low to trigger my upside down compressed air like R2's extinguisher
 #define EXTINGUISHERPIN 3
+
+
 
 #include <Sabertooth.h>
 #include <SyRenSimplified.h>
@@ -113,6 +117,13 @@ char char_array[11];
 #include <MP3Trigger.h>
 #include <Wire.h>
 #include <XBOXRECV.h>
+#include <SoftwareSerial.h>
+
+//Serial connection to Flthys HP's
+#define FlthyTXPin 14 // OR OTHER FREE DIGITAL PIN
+#define FlthyRXPin 15 // OR OTHER FREE DIGITAL PIN  // NOT ACTUALLY USED, BUT NEEDED FOR THE SOFTWARESERIAL FUNCTION
+const int FlthyBAUD = 9600; // OR SET YOUR OWN BAUD AS NEEDED
+SoftwareSerial FlthySerial(FlthyRXPin, FlthyTXPin); 
 
 //#include <SoftwareSerial.h>
 // These are the pins for the Sabertooth and Syren
@@ -182,46 +193,12 @@ XBOXRECV Xbox(&Usb);
 //=====================================
 
 void setup(){
-//  //Syren10Serial.begin(DOMEBAUDRATE);
-//  //#if defined(SYRENSIMPLE)
-//  //  Syren10.motor(0);
-//  //#else
-//  //  Syren10.autobaud();
-//  //#endif
-//
-//  // 9600 is the default baud rate for Sabertooth packet serial.
-//  //Sabertooth2xSerial.begin(9600);
-//  // Send the autobaud command to the Sabertooth controller(s).
-//  //Sabertooth2x.autobaud();
-//  /* NOTE: *Not all* Sabertooth controllers need this command.
-//  It doesn't hurt anything, but V2 controllers use an
-//  EEPROM setting (changeable with the function setBaudRate) to set
-//  the baud rate instead of detecting with autobaud.
-//  If you have a 2x12, 2x25 V2, 2x60 or SyRen 50, you can remove
-//  the autobaud line and save yourself two seconds of startup delay.
-//  */
-//
-//  Sabertooth2x.setTimeout(950);
-//  #if !defined(SYRENSIMPLE)
-//    Syren10.setTimeout(950);
-//  #endif
-//
-//  #if !defined(SYRENSIMPLE)
-//  Syren10.setTimeout(950);
-//  #endif
-//
-//  // The Sabertooth won't act on mixed mode packet serial commands until
-//  // it has received power levels for BOTH throttle and turning, since it
-//  // mixes the two together to get diff-drive power levels for both motors.
-//  Sabertooth2x.drive(0);
-//  Sabertooth2x.turn(0);
-//
-//  pinMode(EXTINGUISHERPIN, OUTPUT);
-//  digitalWrite(EXTINGUISHERPIN, HIGH);
-
 
  Serial1.begin(SABERTOOTHBAUDRATE);
   Serial2.begin(DOMEBAUDRATE);
+
+  //Flthy HP
+  FlthySerial.begin(FlthyBAUD);
 
 #if defined(SYRENSIMPLE)
   Syren10.motor(0);
@@ -345,40 +322,6 @@ void loop(){
   // Plays random sounds or dome movements for automations when in automation mode
   if(isInAutomationMode){
     triggerAutomation();
-//    unsigned long currentMillis = millis();
-//
-//    if(currentMillis - automateMillis > (automateDelay*1000)){
-//      automateMillis = millis();
-//      automateAction = random(1,5);
-//
-//      if(automateAction > 1){
-//        mp3Trigger.play(random(32,52));
-//      }
-//      if(automateAction < 4){
-//        #if defined(SYRENSIMPLE)
-//          Syren10.motor(turnDirection);
-//        #else
-//          Syren10.motor(1,turnDirection);
-//        #endif
-//
-//        delay(750);
-//
-//        #if defined(SYRENSIMPLE)
-//          Syren10.motor(0);
-//        #else
-//          Syren10.motor(1,0);
-//        #endif
-//
-//        if(turnDirection > 0){
-//          turnDirection = -45;
-//        } else {
-//          turnDirection = 45;
-//        }
-//      }
-
-      // sets the mix, max seconds between automation actions - sounds and dome movement
-//      automateDelay = random(3,10);
-//    }
   }
 
   // Volume Control of MP3 Trigger
@@ -440,7 +383,7 @@ void loop(){
       //logic lights
       triggerI2C(10, 19);
       //HPEvent Disco for 53s
-      triggerI2C2(25, "A0040|53");
+      FlthySerial.print("A0040|53\r");
       //Magic Panel event - Flash Q
       triggerI2C(20, 28);
   } else if (Xbox.getButtonPress(L1, 0)) {
@@ -485,7 +428,7 @@ void loop(){
       //logic lights
       triggerI2C(10, 18);
       //HPEvent Disco for 24s
-      triggerI2C2(25, "A0040|24");
+      FlthySerial.print("A0040|24\r");
       //Magic Panel event - Flash Q
       triggerI2C(20, 28);
   } else if (Xbox.getButtonPress(L1, 0)) {
@@ -494,7 +437,7 @@ void loop(){
       //logic lights
       triggerI2C(10, 6);
       // HPEvent 11 - SystemFailure - I2C
-      triggerI2C2(25, "A0050|10");
+      FlthySerial.print("A0050|10\r");
       //Magic Panel event - Fade Out
       triggerI2C(20, 25);
     } else if (Xbox.getButtonPress(L2, 0)) {
@@ -503,7 +446,7 @@ void loop(){
       //logic lights, alarm
       triggerI2C(10, 1);
       //HPEvent pulse Red for 4 seconds
-      triggerI2C2(25, "A0031|4");
+      FlthySerial.print("A0031|4\r");
       //Magic Panel event - Alert 4s
       triggerI2C(20, 6);
     } else if (Xbox.getButtonPress(R1, 0)) {
@@ -512,7 +455,7 @@ void loop(){
       //logic lights, Imperial March
       triggerI2C(10, 11);
       //HPEvent - flash - I2C
-      triggerI2C2(25, "A0030|175");
+      FlthySerial.print("A0030|175\r");
       //magic Panel event - Flash V
       triggerI2C(20, 27);
     } else if (Xbox.getButtonPress(R2, 0)) {
@@ -536,7 +479,7 @@ void loop(){
       //logic lights
       triggerI2C(10, 17);
       //HPEvent Disco for 30s
-      triggerI2C2(25, "A0040|30"); 
+      FlthySerial.print("A0040|30\r");
       //Magic Panel event - Trace Up 1
       triggerI2C(20, 8);
   } else if (Xbox.getButtonPress(L1, 0)) {
@@ -557,7 +500,7 @@ void loop(){
       //logic lights bargrap
       triggerI2C(10, 10);
       // HPEvent 1 - Cantina Music - Disco - I2C
-      triggerI2C2(25, "A0040|165");
+      FlthySerial.print("A0040|165\r");
       //magic Panel event - Trace Down 1
       triggerI2C(20, 10);
     } else if (Xbox.getButtonPress(R2, 0)) {
@@ -583,7 +526,7 @@ void loop(){
       //logic lights
       triggerI2C(10, 16);
       //HPEvent hologram for 6s
-      triggerI2C2(25, "F001|6"); 
+      FlthySerial.print("F001|6\r"); 
       //magic Panel event - Eye Scan
       triggerI2C(20, 23);
     } else if (Xbox.getButtonPress(L2, 0) && Xbox.getButtonPress(R1, 0)) {
@@ -592,7 +535,7 @@ void loop(){
       //logic lights
       triggerI2C(10, 15);
       //HPEvent hologram for 26s
-      triggerI2C2(25, "F001|26"); 
+      FlthySerial.print("F001\26");
       //magic Panel event - Cylon Row
       triggerI2C(20, 22);
     }
@@ -602,7 +545,7 @@ void loop(){
       //logic lights, leia message
       triggerI2C(10, 5);
       // Front HPEvent 1 - HoloMessage leia message 35 seconds
-      triggerI2C2(25, "F001|35");
+      FlthySerial.print("F001|35\r");
       //magic Panel event - Cylon Row
       triggerI2C(20, 22);
     } else if (Xbox.getButtonPress(L2, 0)) {
@@ -611,7 +554,7 @@ void loop(){
       //logic lights - whistle
       triggerI2C(10, 4);
       //HPEvent pulse Red for 4 seconds
-      triggerI2C2(25, "A00312|5");
+      FlthySerial.print("A00312|5\r");
       //magic Panel event - Heart
       triggerI2C(20, 40);
     } else if (Xbox.getButtonPress(R1, 0)) {
@@ -643,14 +586,14 @@ void loop(){
       isHPOn = false;
       // turn hp light off
       // Front HPEvent 2 - ledOFF - I2C
-      triggerI2C2(25, "A098");
-      triggerI2C2(25, "A198");
+      FlthySerial.print("A098\r");
+      FlthySerial.print("A198\r");
     } else {
       isHPOn = true;
       // turn hp light on
       // Front HPEvent 4 - whiteOn - I2C
-      triggerI2C2(25, "A099");
-      triggerI2C2(25, "A199");
+      FlthySerial.print("A099\r");
+      FlthySerial.print("A199\r");
     }
   }
 
@@ -754,12 +697,6 @@ void loop(){
 void triggerI2C(byte deviceID, byte eventID){
   Wire.beginTransmission(deviceID);
   Wire.write(eventID);
-  Wire.endTransmission();
-}
-void triggerI2C2(byte deviceID, String hpEvent) {
-  Wire.beginTransmission(deviceID);
-  hpEvent.toCharArray(char_array,11);
-  Wire.write(char_array);
   Wire.endTransmission();
 }
 

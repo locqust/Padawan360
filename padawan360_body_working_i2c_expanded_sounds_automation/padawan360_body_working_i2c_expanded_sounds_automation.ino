@@ -1,7 +1,14 @@
 // =======================================================================================
-// /////////////////////////Padawan360 Body Code v1.1 ////////////////////////////////////
+// /////////////////////////Padawan360 Body Code v1.4 ////////////////////////////////////
 // =======================================================================================
 /*
+v1.4 by Andy Smith (locqust)
+-reactivated I2C for Teeces
+v1.3 by Andy Smith (locqust)
+-added in code to move automation to a function so can leave him chatting without controller being on
+- code kindly supplied by Tony (DRK-N1GT)
+v1.2 by Andy Smith (locqust)
+-added in my list of expanded sound files and their associated command triggers. Sound files taken from BHD's setup
 v1.1
 by Robert Corvus
 - fixed inverse throttle on right turn

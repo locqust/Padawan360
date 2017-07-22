@@ -1,12 +1,7 @@
 // =======================================================================================
-// /////////////////////////Padawan360 Body Code v1.5 ////////////////////////////////////
+// /////////////////////////Padawan360 Body Code v1.3 ////////////////////////////////////
 // =======================================================================================
 /*
-v1.5 by Andy Smith (locqust)
-- added in I2C command codes for magic panel 
-- added in Flthy I2C command codes (currently not working)
-v1.4 by Andy Smith (locqust)
--reactivated I2C for Teeces
 v1.3 by Andy Smith (locqust)
 -added in code to move automation to a function so can leave him chatting without controller being on
 - code kindly supplied by Tony (DRK-N1GT)
@@ -101,8 +96,6 @@ const int SABERTOOTHBAUDRATE = 9600;
 // and I think it varies across different firmware versions.
 const int DOMEBAUDRATE = 9600;
 
-String hpEvent = "";
-char char_array[11];
 
 // I have a pin set to pull a relay high/low to trigger my upside down compressed air like R2's extinguisher
 #define EXTINGUISHERPIN 3
@@ -438,11 +431,9 @@ void loop(){
       //Addams
       mp3Trigger.play(168);
       //logic lights
-      triggerI2C(10, 19);
+      triggerI2C(10, 0);
       //HPEvent Disco for 53s
-      triggerI2C2(25, "A0040|53");
-      //Magic Panel event - Flash Q
-      triggerI2C(20, 28);
+      //triggerI2C2(25, "A007|53");
   } else if (Xbox.getButtonPress(L1, 0)) {
       //Annoyed
       mp3Trigger.play(8);
@@ -458,63 +449,49 @@ void loop(){
       mp3Trigger.play(9);
       //logic lights, random
       triggerI2C(10, 0);
-      //Magic Panel event - Trace up 1
-      triggerI2C(20, 8);
     } else if (Xbox.getButtonPress(R2, 0)) {
       //More Alarms
       mp3Trigger.play(random(56, 71));
       //logic lights, random
       triggerI2C(10, 0);
-      //Magic Panel event - FlashAll 5s
-      triggerI2C(20, 26);
     } else {
       //Alarms
       mp3Trigger.play(random(13, 17));
       //logic lights, random
       triggerI2C(10, 0);
-      //Magic Panel event - FlashAll 5s
-      triggerI2C(20, 26);
   }
   }
 
   // A Button and A combo Buttons
   if(Xbox.getButtonClick(A, 0)){
    if (Xbox.getButtonPress(L1, 0) && Xbox.getButtonPress(R1, 0)) {
-       //Gangnam
+      //Gangnam
       mp3Trigger.play(169);
       //logic lights
-      triggerI2C(10, 18);
+      triggerI2C(10, 0);
       //HPEvent Disco for 24s
-      triggerI2C2(25, "A0040|24");
-      //Magic Panel event - Flash Q
-      triggerI2C(20, 28);
+      //triggerI2C2(25, "A007|24");
   } else if (Xbox.getButtonPress(L1, 0)) {
       //shortcircuit
       mp3Trigger.play(6);
       //logic lights
       triggerI2C(10, 6);
       // HPEvent 11 - SystemFailure - I2C
-      triggerI2C2(25, "A0050|10");
-      //Magic Panel event - Fade Out
-      triggerI2C(20, 25);
+      //triggerI2C2(25, "A0050|10");
     } else if (Xbox.getButtonPress(L2, 0)) {
       //scream
       mp3Trigger.play(1);
       //logic lights, alarm
       triggerI2C(10, 1);
       //HPEvent pulse Red for 4 seconds
-      triggerI2C2(25, "A0031|4");
-      //Magic Panel event - Alert 4s
-      triggerI2C(20, 6);
+      //triggerI2C2(25, "A0031|4");
     } else if (Xbox.getButtonPress(R1, 0)) {
-       //Imp March
+      //Imp March
       mp3Trigger.play(11);
       //logic lights, Imperial March
       triggerI2C(10, 11);
-      //HPEvent - flash - I2C
-      triggerI2C2(25, "A0030|175");
-      //magic Panel event - Flash V
-      triggerI2C(20, 27);
+      //HPEvent - Vader approaching - I2C
+      //triggerI2C2(25, "A0030|175");
     } else if (Xbox.getButtonPress(R2, 0)) {
       //More Misc
       mp3Trigger.play(random(71, 99));
@@ -534,32 +511,26 @@ void loop(){
       //Muppets
       mp3Trigger.play(172);
       //logic lights
-      triggerI2C(10, 17);
+      triggerI2C(10, 0);
       //HPEvent Disco for 30s
-      triggerI2C2(25, "A0040|30"); 
-      //Magic Panel event - Trace Up 1
-      triggerI2C(20, 8);
+      //triggerI2C2(25, "A007|30"); 
   } else if (Xbox.getButtonPress(L1, 0)) {
       //patrol
       mp3Trigger.play(7);
       //logic lights, random
       triggerI2C(10, 0);
     } else if (Xbox.getButtonPress(L2, 0)) {
-       //DOODOO
+      //DOODOO
       mp3Trigger.play(3);
       //logic lights, random
       triggerI2C(10, 0);
-      //Magic Panel event - One loop sequence
-      triggerI2C(20, 30);
     } else if (Xbox.getButtonPress(R1, 0)) {
       //Cantina
       mp3Trigger.play(10);
       //logic lights bargrap
       triggerI2C(10, 10);
       // HPEvent 1 - Cantina Music - Disco - I2C
-      triggerI2C2(25, "A0040|165");
-      //magic Panel event - Trace Down 1
-      triggerI2C(20, 10);
+      //triggerI2C2(25, "A007|165");
     } else if (Xbox.getButtonPress(R2, 0)) {
       //Proc/Razz
       mp3Trigger.play(random(100, 139));
@@ -570,65 +541,50 @@ void loop(){
       mp3Trigger.play(random(32, 52));
       //logic lights, random
       triggerI2C(10, 0);
-      //Magic Panel event - Expand 2
-      triggerI2C(20, 17);
     }
   }
 
   // X Button and X combo Buttons
   if(Xbox.getButtonClick(X, 0)){
-   if (Xbox.getButtonPress(L1, 0) && Xbox.getButtonPress(R1, 0)) {
-      //Leia Short
-      mp3Trigger.play(170);
-      //logic lights
-      triggerI2C(10, 16);
-      //HPEvent hologram for 6s
-      triggerI2C2(25, "F001|6"); 
-      //magic Panel event - Eye Scan
-      triggerI2C(20, 23);
-    } else if (Xbox.getButtonPress(L2, 0) && Xbox.getButtonPress(R1, 0)) {
+if (Xbox.getButtonPress(L2, 0) && Xbox.getButtonPress(R1, 0)) {
       //Luke message
       mp3Trigger.play(171);
       //logic lights
-      triggerI2C(10, 15);
-      //HPEvent hologram for 26s
-      triggerI2C2(25, "F001|26"); 
-      //magic Panel event - Cylon Row
-      triggerI2C(20, 22);
-    }
+      triggerI2C(10, 0);
+      //HPEvent pulse Red for 4 seconds
+      //triggerI2C2(25, "A00312|5"); 
+    } else if (Xbox.getButtonPress(L1, 0) && Xbox.getButtonPress(R1, 0)) {
+      //Leia Short
+      mp3Trigger.play(170);
+      //logic lights
+      triggerI2C(10, 0);
+      //HPEvent pulse Red for 4 seconds
+      //triggerI2C2(25, "A00312|5"); 
+  } else if (Xbox.getButtonPress(L1, 0)) {
     // leia message L1+X
-    else if (Xbox.getButtonPress(L1, 0)) {
       mp3Trigger.play(5);
       //logic lights, leia message
       triggerI2C(10, 5);
       // Front HPEvent 1 - HoloMessage leia message 35 seconds
-      triggerI2C2(25, "F001|35");
-      //magic Panel event - Cylon Row
-      triggerI2C(20, 22);
+      //triggerI2C2(25, "F001|35");
     } else if (Xbox.getButtonPress(L2, 0)) {
       //WolfWhistle
       mp3Trigger.play(4);
-      //logic lights - whistle
+      //logic lights - Alarm
       triggerI2C(10, 4);
       //HPEvent pulse Red for 4 seconds
-      triggerI2C2(25, "A00312|5");
-      //magic Panel event - Heart
-      triggerI2C(20, 40);
+      //triggerI2C2(25, "A00312|5");
     } else if (Xbox.getButtonPress(R1, 0)) {
       //Duel of the Fates
       mp3Trigger.play(12);
       //logic lights, random
       triggerI2C(10, 0);
-      //magic Panel event - Flash Q
-      triggerI2C(20, 28);
     } else if (Xbox.getButtonPress(R2, 0)) {
       //Proc/Razz
       mp3Trigger.play(random(139, 168));
       //logic lights, random
       triggerI2C(10, 0);
-      //magic Panel event - Compress 2
-      triggerI2C(20, 19);
-    } else  {
+    } else {
       //ohh/sent
       mp3Trigger.play(random(25, 32));
       //logic lights, random
@@ -643,14 +599,12 @@ void loop(){
       isHPOn = false;
       // turn hp light off
       // Front HPEvent 2 - ledOFF - I2C
-      triggerI2C2(25, "A098");
-      triggerI2C2(25, "A198");
+      triggerI2C(25, 2);
     } else {
       isHPOn = true;
       // turn hp light on
       // Front HPEvent 4 - whiteOn - I2C
-      triggerI2C2(25, "A099");
-      triggerI2C2(25, "A199");
+      triggerI2C(25, 1);
     }
   }
 
@@ -665,29 +619,20 @@ void loop(){
       drivespeed = DRIVESPEED2;
       Xbox.setLedOn(LED2, 0);
       mp3Trigger.play(53);
-      //Teeces event
       triggerI2C(10, 22);
-      //magic Panel event - AllOn 5s
-      triggerI2C(20, 3);
     } else if(drivespeed == DRIVESPEED2 && (DRIVESPEED3!=0)){
       //change to high speed and play sound scream
       drivespeed = DRIVESPEED3;
       Xbox.setLedOn(LED3, 0);
       mp3Trigger.play(1);
-      //Teeces event
       triggerI2C(10, 23);
-      //magic Panel event - AllOn 10s
-      triggerI2C(20, 4);
     } else {
       //we must be in high speed
       //change to low speed and play sound 2-tone
       drivespeed = DRIVESPEED1;
       Xbox.setLedOn(LED1, 0);
       mp3Trigger.play(52);
-      //Teeces event
       triggerI2C(10, 21);
-      //magic Panel event - AllOn 2s
-      triggerI2C(20, 2);
     }
   }
 
@@ -747,20 +692,11 @@ void loop(){
  Syren10.motor(1, domeThrottle);
 } // END loop()
 
-//=============================
-// FUNCTIONS FOR LOOP        //
-//=============================
 
 void triggerI2C(byte deviceID, byte eventID){
-  Wire.beginTransmission(deviceID);
-  Wire.write(eventID);
-  Wire.endTransmission();
-}
-void triggerI2C2(byte deviceID, String hpEvent) {
-  Wire.beginTransmission(deviceID);
-  hpEvent.toCharArray(char_array,11);
-  Wire.write(char_array);
-  Wire.endTransmission();
+  //Wire.beginTransmission(deviceID);
+  //Wire.write(eventID);
+  //Wire.endTransmission();
 }
 
 void triggerAutomation() {
