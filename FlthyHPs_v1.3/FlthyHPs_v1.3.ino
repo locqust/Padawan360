@@ -152,7 +152,8 @@
 ///*****       so we will use it to. It can be changed here if needed.    *****///
 ///*****                                                                  *****///
 //////////////////////////////////////////////////////////////////////////////////
-#define I2CADDRESS 0x19  // 25 in Hexadecmal
+//#define I2CADDRESS 0x19  // 25 in Hexadecmal
+//#define I2CADDRESS 25
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -278,9 +279,9 @@ const unsigned int LEDTwitchInterval[HPCOUNT][2] = {{60,180},            // (1mi
                                                     {45,240},           // (45secs-4mins) Enter min and max seconds Rear HP Led Twitches 
                                                     {60,180}};          // (1mins-3mins) Enter min and max seconds Top HP Led Twitches    
     
-const unsigned int HPTwitchInterval[HPCOUNT][2] = {{15,75},             // (45s-2mins) Enter min and max seconds Front HP Servo Twitches  
-                                                   {25,120},             // (1min-3mins) Enter min and max seconds Rear HP Servo Twitches
-                                                   {25,120}};            // (1min-3mins) Enter min and max seconds Top HP Servo Twitches  
+const unsigned int HPTwitchInterval[HPCOUNT][2] = {{15,55},             // (45s-2mins) Enter min and max seconds Front HP Servo Twitches  
+                                                   {15,80},             // (1min-3mins) Enter min and max seconds Rear HP Servo Twitches
+                                                   {25,80}};            // (1min-3mins) Enter min and max seconds Top HP Servo Twitches  
 
 ///////////////////////////////////////////////////////////////////////////////////
 ///*****                  LED Auto Twitch Run Time Ranges                  *****///
@@ -479,7 +480,7 @@ boolean       OEFlag = false;
 ///*****        Command Varaiables, Containers & Flags        *****///
 //////////////////////////////////////////////////////////////////////
 
-#define INPUTBUFFERLEN 7
+#define INPUTBUFFERLEN 11
 char inputBuffer[INPUTBUFFERLEN];  
 String inputString = "";                       // a string to hold incoming data
 volatile boolean stringComplete = false;       // whether the serial string is complete
@@ -600,9 +601,10 @@ void setup() {
  
   Serial.begin(9600);                      // Starts Serial with a baudrate of 9600
   Serial.println("Serial Output begin");
-  inputString.reserve(10);                 // reserve 10 bytes for the inputString
+  inputString.reserve(11);                 // reserve 10 bytes for the inputString
  
-  Wire.begin(I2CADDRESS);                  // Connects to I2C Bus and establishes address.
+  //Wire.begin(I2CADDRESS);                  // Connects to I2C Bus and establishes address.
+  Wire.begin(25);                  // Connects to I2C Bus and establishes address.
   Wire.onReceive(i2cEvent);                // Register event so when we receive something we jump to i2cEvent();
 
 
@@ -610,7 +612,7 @@ void setup() {
   ///                Status LED Setup                ///
   //////////////////////////////////////////////////////
   pinMode(STATUSLEDPIN, OUTPUT);
-  
+  Serial.println(OUTPUT);
   //////////////////////////////////////////////////////
   ///                  RC Input Setup                ///
   //////////////////////////////////////////////////////
@@ -1326,9 +1328,11 @@ void i2cEvent(int howMany)
   inputString = "";                                     // Ensures inputString is empty
   while(Wire.available())  {                            // loop through all incoming bytes
     char inChar = (char)Wire.read();                    // Receive each byte as a character
+    Serial.print("Recieving string");
     inputString += inChar;                              // Add each Character to inputString
   }
   stringComplete = true;                                // Once done, set a flag so the main loop can do something about it. 
+  Serial.print(inputString);
   statusLEDOn();
 }
 
